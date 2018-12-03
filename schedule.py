@@ -63,6 +63,20 @@ def wheather():
     return obj
 
 
+def news():
+    html = urlopen('http://www.ltn.com.tw/').read().decode('utf-8')
+    print('Start parsing news ...')
+    soup = BeautifulSoup(html, features='lxml')
+    lis = soup.select('.nownews_content ul li')
+    content = ''
+    for li in lis:
+        li.select_one('.time').decompose()
+        title = li.text
+        href = li.a['href']
+        content += '{}\n{}\n'.format(title, unquote(href))
+    return content
+
+
 # Firebase
 url = os.environ.get('Firebase_Url')
 fb = firebase.FirebaseApplication(url)
@@ -72,6 +86,7 @@ fb.post('time', dateNow.strftime('%Y-%m-%d %H:%M:%S'),
 fb.post('movie', movie(), headers={'X-HTTP-Method-Override': 'PUT'})
 fb.post('currency', currency(), headers={'X-HTTP-Method-Override': 'PUT'})
 fb.post('wheather', wheather(), headers={'X-HTTP-Method-Override': 'PUT'})
+fb.post('news', news(), headers={'X-HTTP-Method-Override': 'PUT'})
 
 if __name__ == "__main__":
     app.run()
